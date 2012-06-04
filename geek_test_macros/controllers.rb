@@ -43,7 +43,8 @@ module GeekTestMacros
         fixture = find_fixture_for(record, described_model)
 
         assigned_resource = assigns(model_name.to_sym)
-        assert_not_nil assigned_resource
+        assert_not_nil assigned_resource,
+          "@#{model_name} not assigned at #show action"
         assert_equal fixture, assigned_resource
 
         instance_eval &test_body if block_given?
