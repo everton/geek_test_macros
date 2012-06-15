@@ -144,6 +144,12 @@ module GeekTestMacros
     module ModelIntrospections
       def model_name; described_model.name.underscore; end
 
+      def described(described = nil)
+        super(described).tap do |d|
+          setup { @controller = d.new } unless d.nil?
+        end
+      end
+
       def described_model
         return described unless described < ApplicationController
 

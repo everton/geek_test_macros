@@ -8,7 +8,7 @@ module GeekTestMacros
     base.extend GeekTestMacros::Controllers
   end
 
-  def described; self.class.described; end
+  def described(described = nil); self.class.described(described); end
   def find_fixture_for(register, model_class = described)
     # fixture_class_names:
     #   { :financial_posts => "FinancialPost" }
@@ -46,7 +46,9 @@ module GeekTestMacros
   end
 
   module Base
-    def described
+    def described(described = nil)
+      return @described = described if described
+
       @described ||= self.name.gsub(/Test$/, '')
         .split('::')
         .reduce(Object) do |parent, local_name|
