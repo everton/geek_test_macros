@@ -152,6 +152,10 @@ module GeekTestMacros
           .reduce(Object) do |parent, local_name|
           parent.const_get(local_name.singularize)
         end
+      rescue
+        raise "Impossible to determine described model for" +
+          " #{described.inspect}\nPlease overwrite #described_model" +
+          " returning the class of the described model."
       end
     end
 

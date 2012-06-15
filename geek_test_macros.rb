@@ -52,6 +52,10 @@ module GeekTestMacros
         .reduce(Object) do |parent, local_name|
         parent.const_get(local_name)
       end
+    rescue
+      raise "Impossible to determine described target for" +
+        " #{self.name}\nPlease overwrite #described" +
+        " returning the described class."
     end
   end
 end
