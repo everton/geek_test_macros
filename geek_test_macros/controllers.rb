@@ -208,11 +208,10 @@ module GeekTestMacros
         dom_name = "#{model_name}[#{attr}]"
 
         assert_select options[:wrapper] || 'p' do
-          assert_select "label[for=#{dom_id}]"
-
           type = options.delete(:type)
           options.merge!(:id => dom_id, :name => dom_name)
           if type == :textarea
+            assert_select "label[for=#{dom_id}]"
             text = options.delete(:text)
             if text.blank?
               assert_select "#{type}#{selector_for(options)}"
@@ -220,8 +219,15 @@ module GeekTestMacros
               assert_select "#{type}#{selector_for(options)}", text
             end
           elsif type == :date_select
+            assert_select "label[for=#{dom_id}]"
             assert_date_select attr, options
+          elsif type == :radio
+            options[:values].each do |v|
+              assert_select "label[for=#{options[:id]}_#{v}]"
+            end
+            assert_radio attr, options
           else
+            assert_select "label[for=#{dom_id}]"
             assert_input type, options
           end
         end
@@ -254,6 +260,22 @@ module GeekTestMacros
       def assert_input(type, options = {})
         selector = selector_for(options.merge(:type => type))
         assert_select "input#{selector}"
+      end
+
+      def assert_radio(attr, options = {})
+        values  = options.delete(:values)
+        raise "Set values for radio button #{options[:name]}" if values.blank?
+
+        checked = options.delete(:checked) || values.first
+        values.each do |value|
+          radio_options = options.merge type: :radio,
+            id: "#{options[:id]}_#{value}"
+
+          radio_options[:checked] = 'checked' if checked == value
+
+          selector = selector_for(radio_options)
+          assert_select "input#{selector}"
+        end
       end
 
       def assert_select_box(options = {}, &block)
