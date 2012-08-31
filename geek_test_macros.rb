@@ -57,6 +57,26 @@ module GeekTestMacros
     assert_empty subject.errors[attr], fail_msg
   end
 
+  def assert_order_ascending(collection, msg = nil)
+    msg ||= "<#{collection.inspect}> expected to be on ascending order"
+
+    ordered = collection.each_cons(2).all? do |expected_lesser, expected_greater|
+      expected_lesser <= expected_greater
+    end
+
+    assert ordered, msg
+  end
+
+  def assert_order_descending(collection, msg = nil)
+    msg ||= "<#{collection.inspect}> expected to be on descending order"
+
+    ordered = collection.each_cons(2).all? do |expected_lesser, expected_greater|
+      expected_lesser >= expected_greater
+    end
+
+    assert ordered, msg
+  end
+
   module Base
     def described(described = nil)
       return @described = described if described
