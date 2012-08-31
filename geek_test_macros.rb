@@ -23,26 +23,38 @@ module GeekTestMacros
       I18n.t("activerecord.errors.messages")[kind.to_sym]
   end
 
-  def assert_bad_value(attr, value, msg)
-    msg = error_message_for(msg) if msg.is_a? Symbol
-    error_msg = "#{described.name} with #{attr} '#{value}'" +
-      " expected to not be valid"
+  # Usage:
+  #   assert_bad_value(:foo, 'bar', 'Bar not valid for foo')
+  #   assert_bad_value(:foo, 'bar', :invalid, 'Are not validating')
+  def assert_bad_value(attr, value, validation_msg, fail_msg = nil)
+    validation_msg = error_message_for(validation_msg) if
+      validation_msg.is_a? Symbol
 
-    described.new(attr => value).tap do |new|
-      refute new.valid?, error_msg
+    fail_msg ||= "#{described.name} with #{attr} '#{value}'" +
+      " expected to be invalid"
 
-      assert_includes new.errors[attr], msg
-    end
+    subject = described.new
+    subject.send("#{attr}=", value)
+
+    refute subject.valid?, fail_msg
+    assert_includes subject.errors[attr], validation_msg
   end
 
-  def assert_good_value(attr, value)
-    described.new(attr => value) do |new|
-      new.valid?
-      assert_empty(new.errors[attr],
-                   "Expected #{attr} '#{value}'" +
-                   " to be valid on #{described.name}." +
-                   "\nErrors on #{attr}: #{new.errors}")
-    end
+  # Usage:
+  #   assert_good_value(:foo, 'bar')
+  #   assert_good_value(:foo, 'bar', 'Bar not valid on foo')
+  def assert_good_value(attr, value, fail_msg = nil)
+    subject = described.new
+    subject.send("#{attr}=", value)
+
+    subject.valid? # just validates it, don't assert about this,
+    # another attributes can be invalid and we are not testing them now
+
+    fail_msg ||= "Expected #{attr} '#{value}'" +
+                 " to be valid on #{described.name}.\n" +
+                 "Errors on #{attr}: <#{subject.errors.inspect}>"
+
+    assert_empty subject.errors[attr], fail_msg
   end
 
   module Base
