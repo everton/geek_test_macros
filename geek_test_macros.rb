@@ -18,9 +18,13 @@ module GeekTestMacros
     end
   end
 
-  def error_message_for(kind)
-    I18n.t("errors.messages")[kind.to_sym] ||
-      I18n.t("activerecord.errors.messages")[kind.to_sym]
+  def error_message_for(kind, options = {})
+    kind = kind.to_sym
+    if I18n.t("activerecord.errors.messages").has_key? kind
+      I18n.t("activerecord.errors.messages.#{kind}", options)
+    else
+      I18n.t("errors.messages.#{kind}", options)
+    end
   end
 
   # Usage:
